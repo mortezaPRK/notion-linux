@@ -23,6 +23,10 @@ jobs:
           wget https://desktop-release.notion-static.com/Notion-${NOTION_VERSION}.dmg
           wget https://www.7-zip.org/a/7z2408-linux-x64.tar.xz
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          
       - name: Extract
         run: |
           tar -xf 7z2408-linux-x64.tar.xz
