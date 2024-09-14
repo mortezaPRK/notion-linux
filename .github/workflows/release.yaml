@@ -9,7 +9,7 @@ env:
   NOTION_VERSION: "3.14.0"
 
   # Increament if fixing same notion version, otherwise should be zero
-  SUB_RELEASE: "3"
+  SUB_RELEASE: "4"
 
 jobs:
   build:
