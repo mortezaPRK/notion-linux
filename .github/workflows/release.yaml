@@ -28,7 +28,7 @@ jobs:
 
       - name: Replace BufferUtil
         run: |
-          VERSION=$(jq  -r'.dependencies["bufferutil"]' asar_patched/package.json)
+          VERSION=$(jq -r '.dependencies["bufferutil"]' asar_patched/package.json)
           mkdir bufferutil && cd bufferutil
           echo "Going to install bufferutil: $VERSION"
           npm install --no-save "bufferutil@${VERSION}"
