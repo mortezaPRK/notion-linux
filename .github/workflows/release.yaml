@@ -61,12 +61,12 @@ jobs:
           # avoid running duplicated instances, restores the window if notion is running in tray
           sed -i 's/a\.app\.on("open-url",_.handleOpenUrl)):"win32"===process\.platform/a\.app\.on("open-url",_.handleOpenUrl)):"linux"===process\.platform/g' "asar_patched/.webpack/main/index.js"
 
-          # including package.json in the tar
-          cp asar_patched/package.json .
-
       - name: Archive
         run: |
           npx asar p "asar_patched" "app.asar" --unpack *.node
+
+          # including package.json in the tar
+          cp asar_patched/package.json .
           tar cvf notion-linux.tar app.asar app.asar.unpacked package.json
 
       - name: Release

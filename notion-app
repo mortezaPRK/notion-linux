@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+cd /opt/notion-app
+
+exec "/usr/bin/electron" app.asar "$(grep -vs '^#' "${XDG_CONFIG_HOME:-~/.config}/notion-flags.conf)" "$@"
