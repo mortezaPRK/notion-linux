@@ -9,7 +9,7 @@ env:
   NOTION_VERSION: "3.14.0"
 
   # Increament if fixing same notion version, otherwise should be zero
-  SUB_RELEASE: "5"
+  SUB_RELEASE: "6"
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           
       - name: Extract
         run: |
