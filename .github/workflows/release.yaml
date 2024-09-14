@@ -6,10 +6,10 @@ on:
       - main
 
 env:
-  NOTION_VERSION: "3.13.0"
+  NOTION_VERSION: "3.14.0"
 
   # Increament if fixing same notion version, otherwise should be zero
-  SUB_RELEASE: "3"
+  SUB_RELEASE: "0"
 
 jobs:
   build:
@@ -19,26 +19,35 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download
-        run: |
-          wget https://desktop-release.notion-static.com/Notion-${NOTION_VERSION}.dmg
-          wget https://github.com/websockets/bufferutil/releases/download/v4.0.8/v4.0.8-linux-x64.tar
-          wget https://github.com/WiseLibs/better-sqlite3/releases/download/v11.2.1/better-sqlite3-v11.2.1-electron-v125-linux-x64.tar.gz
+        run: wget https://desktop-release.notion-static.com/Notion-${NOTION_VERSION}.dmg
 
       - name: Extract
         run: |
           7z x "Notion-${NOTION_VERSION}.dmg" "Notion/Notion.app/Contents/Resources/app.asar" "Notion/Notion.app/Contents/Resources/app.asar.unpacked"
           npx asar e "Notion/Notion.app/Contents/Resources/app.asar" "asar_patched"
-          tar xfz better-sqlite3-v11.2.1-electron-v125-linux-x64.tar.gz
-          tar xf v4.0.8-linux-x64.tar
-          
+
+      - name: Replace BufferUtil
+        run: |
+          VERSION=$(jq '.dependencies["bufferutil"]' asar_patched/package.json)
+          mkdir bufferutil && cd bufferutil
+          echo "Going to install bufferutil: $VERSION"
+          npm install --no-save "bufferutil@${VERSION}"
+          cd ..
+          mv bufferutil/node_modules/bufferutil/prebuilds/linux-x64/node.napi.node asar_patched/node_modules/bufferutil/build/Release/bufferutil.node
+          rm -rf bufferutil
+
+      - name: Replace Better SQLite
+        run: |
+          VERSION=$(jq '.dependencies["better-sqlite3"]' asar_patched/package.json)
+          mkdir better_sqlite3 && cd better_sqlite3
+          echo "Going to install better_sqlite3: $VERSION"
+          npm install --no-save "$VERSION"
+          cd ..
+          mv better_sqlite3/node_modules/better-sqlite3/build/Release/better_sqlite3.node asar_patched/node_modules/better-sqlite3/build/Release/
+          rm -rf better_sqlite3
+
       - name: Patch
         run: |
-          # replacing better_sqlite3 release in the patched resources
-          mv "build/Release/better_sqlite3.node" "asar_patched/node_modules/better-sqlite3/build/Release/"
-
-          # replacing bufferutil release in the patched resources
-          mv "linux-x64/node.napi.node" "asar_patched/node_modules/bufferutil/build/Release/bufferutil.node"
-
           # removing some unnecessary files
           rm "asar_patched/node_modules/node-mac-window" -r
           rm "asar_patched/node_modules/better-sqlite3/build/Release/test_extension.node"
@@ -58,17 +67,13 @@ jobs:
           sed -i 's|this\.tray\.on("click",(()=>{this\.onClick()}))|this.tray.setContextMenu(this.trayMenu),this.tray.on("click",(()=>{this.onClick()}))|g' "asar_patched/.webpack/main/index.js"
           sed -i 's|getIcon(){[^}]*}|getIcon(){return s.default.join(__dirname, "trayIcon.png");}|g' "asar_patched/.webpack/main/index.js"
 
-          # avoid running duplicated instances, restores the window if notion is running in tray
-          sed -i 's/g=r(69340);/g=r(69340),appControl=r(21852),gotTheLock=l.app.requestSingleInstanceLock();/g' "$srcdir/asar_patched/.webpack/main/index.js"
-	        sed -i 's/l.app.on("render-process-gone",/!gotTheLock?l.app.quit():d.default.info("first instance!"),l.app.on("second-instance",()=>{const t=appControl.appController.getMostRecentlyFocusedWindowController();t?t.browserWindow.show():m.appController.newWindow({});}),l.app.on("render-process-gone",/g' "$srcdir/asar_patched/.webpack/main/index.js"
-
-          # including package.json in the tar
-          cp asar_patched/package.json .
+          # avoid running duplicated instances, fixes url opening
+          sed -i 's/a\.app\.on("open-url",_.handleOpenUrl)):"win32"===process\.platform/a\.app\.on("open-url",_.handleOpenUrl)):"linux"===process\.platform/g' "$srcdir/asar_patched/.webpack/main/index.js"
 
       - name: Archive
         run: |
           npx asar p "asar_patched" "app.asar" --unpack *.node
-          tar cvf notion-linux.tar app.asar app.asar.unpacked package.json
+          tar cvf notion-linux.tar app.asar app.asar.unpacked
 
       - name: Release
         uses: softprops/action-gh-release@v2
