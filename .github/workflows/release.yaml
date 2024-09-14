@@ -61,7 +61,7 @@ jobs:
           # avoid running duplicated instances, restores the window if notion is running in tray
           sed -i 's/g=r(69340);/g=r(69340),appControl=r(21852),gotTheLock=l.app.requestSingleInstanceLock();/g' "$srcdir/asar_patched/.webpack/main/index.js"
 	        sed -i 's/l.app.on("render-process-gone",/!gotTheLock?l.app.quit():d.default.info("first instance!"),l.app.on("second-instance",()=>{const t=appControl.appController.getMostRecentlyFocusedWindowController();t?t.browserWindow.show():m.appController.newWindow({});}),l.app.on("render-process-gone",/g' "$srcdir/asar_patched/.webpack/main/index.js"
-	
+
           # including package.json in the tar
           cp asar_patched/package.json .
 
