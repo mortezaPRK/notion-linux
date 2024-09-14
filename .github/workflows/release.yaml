@@ -73,7 +73,8 @@ jobs:
       - name: Archive
         run: |
           npx asar p "asar_patched" "app.asar" --unpack *.node
-          tar cvf notion-linux.tar app.asar app.asar.unpacked
+          echo '{"productName":"Notion"}' > package.json
+          tar cvf notion-linux.tar app.asar app.asar.unpacked package.json
 
       - name: Release
         uses: softprops/action-gh-release@v2
