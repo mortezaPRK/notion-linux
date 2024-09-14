@@ -28,7 +28,7 @@ jobs:
 
       - name: Replace BufferUtil
         run: |
-          VERSION=$(jq '.dependencies["bufferutil"]' asar_patched/package.json)
+          VERSION=$(jq  -r'.dependencies["bufferutil"]' asar_patched/package.json)
           mkdir bufferutil && cd bufferutil
           echo "Going to install bufferutil: $VERSION"
           npm install --no-save "bufferutil@${VERSION}"
@@ -38,7 +38,7 @@ jobs:
 
       - name: Replace Better SQLite
         run: |
-          VERSION=$(jq '.dependencies["better-sqlite3"]' asar_patched/package.json)
+          VERSION=$(jq -r '.dependencies["better-sqlite3"]' asar_patched/package.json)
           mkdir better_sqlite3 && cd better_sqlite3
           echo "Going to install better_sqlite3: $VERSION"
           npm install --no-save "$VERSION"
