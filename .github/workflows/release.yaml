@@ -36,18 +36,19 @@ jobs:
           mv bufferutil/node_modules/bufferutil/prebuilds/linux-x64/node.napi.node asar_patched/node_modules/bufferutil/build/Release/bufferutil.node
           rm -rf bufferutil
 
-      - name: Replace Better SQLite
-        run: |
-          VERSION=$(jq -r '.dependencies["better-sqlite3"]' asar_patched/package.json)
-          mkdir better_sqlite3 && cd better_sqlite3
-          echo "Going to install better_sqlite3: $VERSION"
-          npm install --no-save "$VERSION"
-          cd ..
-          mv better_sqlite3/node_modules/better-sqlite3/build/Release/better_sqlite3.node asar_patched/node_modules/better-sqlite3/build/Release/
-          rm -rf better_sqlite3
+      # - name: Replace Better SQLite
+      #   run: |
+      #     VERSION=$(jq -r '.dependencies["better-sqlite3"]' asar_patched/package.json)
+      #     mkdir better_sqlite3 && cd better_sqlite3
+      #     echo "Going to install better_sqlite3: $VERSION"
+      #     npm install --no-save "$VERSION"
+      #     cd ..
+      #     mv better_sqlite3/node_modules/better-sqlite3/build/Release/better_sqlite3.node asar_patched/node_modules/better-sqlite3/build/Release/
+      #     rm -rf better_sqlite3
 
       - name: Patch
         run: |
+          ls -al
           # removing some unnecessary files
           rm "asar_patched/node_modules/node-mac-window" -r
           rm "asar_patched/node_modules/better-sqlite3/build/Release/test_extension.node"
