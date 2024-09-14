@@ -9,21 +9,24 @@ env:
   NOTION_VERSION: "3.14.0"
 
   # Increament if fixing same notion version, otherwise should be zero
-  SUB_RELEASE: "1"
+  SUB_RELEASE: "2"
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Download
-        run: wget https://desktop-release.notion-static.com/Notion-${NOTION_VERSION}.dmg
+        run: |
+          wget https://desktop-release.notion-static.com/Notion-${NOTION_VERSION}.dmg
+          wget https://www.7-zip.org/a/7z2408-linux-x64.tar.xz
 
       - name: Extract
         run: |
-          7z x "Notion-${NOTION_VERSION}.dmg" "Notion/Notion.app/Contents/Resources/app.asar" "Notion/Notion.app/Contents/Resources/app.asar.unpacked"
+          tar -xf 7z2408-linux-x64.tar.xz
+          ./7zz x "Notion-${NOTION_VERSION}.dmg" "Notion/Notion.app/Contents/Resources/app.asar" "Notion/Notion.app/Contents/Resources/app.asar.unpacked"
           npx asar e "Notion/Notion.app/Contents/Resources/app.asar" "asar_patched"
 
       - name: Replace BufferUtil
