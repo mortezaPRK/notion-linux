@@ -9,7 +9,7 @@ env:
   NOTION_VERSION: "3.13.0"
 
   # Increament if fixing same notion version, otherwise should be zero
-  SUB_RELEASE: "1"
+  SUB_RELEASE: "2"
 
 jobs:
   build:
@@ -61,10 +61,13 @@ jobs:
           # avoid running duplicated instances, restores the window if notion is running in tray
           sed -i 's/a\.app\.on("open-url",_.handleOpenUrl)):"win32"===process\.platform/a\.app\.on("open-url",_.handleOpenUrl)):"linux"===process\.platform/g' "asar_patched/.webpack/main/index.js"
 
+          # including package.json in the tar
+          cp asar_patched/package.json .
+
       - name: Archive
         run: |
           npx asar p "asar_patched" "app.asar" --unpack *.node
-          tar cvf notion-linux.tar app.asar app.asar.unpacked
+          tar cvf notion-linux.tar app.asar app.asar.unpacked package.json
 
       - name: Release
         uses: softprops/action-gh-release@v2
